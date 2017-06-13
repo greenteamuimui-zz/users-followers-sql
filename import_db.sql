@@ -1,8 +1,14 @@
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (
   id INTEGER PRIMARY KEY,
   fname VARCHAR(255) NOT NULL,
   lname VARCHAR(255) NOT NULL
 );
+-- ==================================
+
+
+DROP TABLE IF EXISTS questions;
 
   CREATE TABLE questions (
     id INTEGER PRIMARY KEY,
@@ -13,6 +19,10 @@ CREATE TABLE users (
     FOREIGN KEY (author_id) REFERENCES users(id)
   );
 
+  -- ==================================
+
+DROP TABLE IF EXISTS question_follows;
+
   CREATE TABLE question_follows (
     id INTEGER PRIMARY KEY,
     user_id INTEGER,
@@ -22,12 +32,16 @@ CREATE TABLE users (
     FOREIGN KEY (question_id) REFERENCES questions(id)
   );
 
+  -- ==================================
+
+  DROP TABLE IF EXISTS replies;
+
   CREATE TABLE replies (
     id INTEGER PRIMARY KEY,
     subject_in_question INTEGER NOT NULL,
     parent_reply INTEGER,
-    author_id INTEGER NOT NULL
-    body TEXT NOT NULL
+    author_id INTEGER NOT NULL,
+    body TEXT NOT NULL,
 
 
     FOREIGN KEY (author_id) REFERENCES users(id),
@@ -35,7 +49,11 @@ CREATE TABLE users (
     FOREIGN KEY (parent_reply) REFERENCES replies(id)
   );
 
-  CREATE TABLE questions_like(
+  -- ==================================
+
+DROP TABLE IF EXISTS questions_likes;
+
+  CREATE TABLE questions_likes (
     id INTEGER PRIMARY KEY,
     question_liked INTEGER,
     liked_by_user INTEGER,
@@ -44,36 +62,40 @@ CREATE TABLE users (
     FOREIGN KEY (liked_by_user) REFERENCES users(id)
   );
 
+  -- ==================================
+
   INSERT INTO
-    users (fname, lname)
+    users(fname, lname)
   VALUES
-    ('Cherry', 'Lam')
-    ('Janet', 'Lee')
-    ('Jane', 'Doe')
-    ('John', 'Doe')
+    ('Cherry', 'Lam'),
+    ('Janet', 'Lee'),
+    ('Jane', 'Doe'),
+    ('John', 'Doe');
 
   INSERT INTO
     questions(title, body, author_id)
   VALUES
-    ('App Academy', 'How to succeed?', (SELECT id FROM users WHERE fname = 'Cherry' AND lname = 'Lam')
-    ('Hack Reactor', 'What is your name?', (SELECT id FROM users WHERE fname = 'Janet' AND lname = 'Lee')
+    ('App Academy', 'How to succeed?', (SELECT id FROM users WHERE fname = 'Cherry' AND lname = 'Lam')),
+    ('Hack Reactor', 'What is your name?', (SELECT id FROM users WHERE fname = 'Janet' AND lname = 'Lee'));
 
   INSERT INTO
     question_follows(user_id, question_id)
   VALUES
-    ((SELECT id FROM users WHERE fname = 'Jane'), (SELECT id FROM questions WHERE title = 'App Academy'))
-    ((SELECT id FROM users WHERE fname = 'John'), (SELECT id FROM questions WHERE title = 'Hack Reactor'))
+    ((SELECT id FROM users WHERE fname = 'Jane'), (SELECT id FROM questions WHERE title = 'App Academy')),
+    ((SELECT id FROM users WHERE fname = 'John'), (SELECT id FROM questions WHERE title = 'Hack Reactor'));
 
   INSERT INTO
     -- #replies, questions_like
     replies(subject_in_question, parent_reply, author_id, body)
   VALUES
-    ((SELECT id FROM questions WHERE id = 1), NULL, (SELECT id FROM users WHERE fname = 'Jane'),'Sleep alot!')
-    ((SELECT id FROM questions WHERE id = 2), NULL, (SELECT id FROM users WHERE fname = 'John'),'DJ jazzy')
-    ((SELECT id FROM questions WHERE id = 1), (SELECT id FROM replies WHERE body = 'DJ jazzy'), (SELECT id FROM users WHERE fname = 'Jane'),'Study')
+    ((SELECT id FROM questions WHERE id = 1), NULL, (SELECT id FROM users WHERE fname = 'Jane'),'Sleep alot!'),
+    ((SELECT id FROM questions WHERE id = 2), NULL, (SELECT id FROM users WHERE fname = 'John'),'DJ jazzy'),
+    ((SELECT id FROM questions WHERE id = 1), 1, (SELECT id FROM users WHERE fname = 'Jane'),'Study');
+
+-- (SELECT id FROM replies WHERE body = 'Sleep alot!')
 
   INSERT INTO
-    questions_liked(questions_liked, liked_by_user)
+    questions_likes(question_liked, liked_by_user)
   VALUES
-    ((SELECT id FROM questions WHERE body = 'How to succeed?'), (SELECT id FROM users WHERE fname = 'Janet' AND lname = 'Lee'))
-    ((SELECT id FROM questions WHERE body = 'What is your name?'), (SELECT id FROM users WHERE fname = 'Cherry' AND lname = 'Lam'))
+    ((SELECT id FROM questions WHERE body = 'How to succeed?'), (SELECT id FROM users WHERE fname = 'Janet' AND lname = 'Lee')),
+    ((SELECT id FROM questions WHERE body = 'What is your name?'), (SELECT id FROM users WHERE fname = 'Cherry' AND lname = 'Lam'));
