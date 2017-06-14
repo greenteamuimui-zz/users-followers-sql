@@ -43,4 +43,21 @@ class Questions
     @body = options['body']
     @author_id = options['author_id']
   end
+
+  def author
+    author = QuestionsDBConnection.instance.execute(<<-SQL, author_id)
+      SELECT
+        *
+      FROM
+        users
+      WHERE
+        id = ?
+    SQL
+
+    author.map {|user_hash| Users.new(user_hash)}
+  end
+
+  def replies
+    Replies.find_by_question_id(id)
+  end
 end

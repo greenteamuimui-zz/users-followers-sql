@@ -21,7 +21,7 @@ class Replies
   Replies.new(reply.first)
   end
 
-  def find_by_user_id(user_id)
+  def self.find_by_user_id(user_id) #returns replies to user_id regardless of questions
     reply = QuestionsDBConnection.instance.execute(<<-SQL, user_id)
       SELECT
         *
@@ -55,5 +55,59 @@ class Replies
     @author_id = options['author_id']
     @body = options['body']
   end
+
+  def author #return array of authors
+    author = QuestionsDBConnection.instance.execute(<<-SQL, author_id)
+      SELECT
+        *
+      FROM
+        users
+      WHERE
+        id = ?
+    SQL
+    return nil if author.empty?
+    author.map {|hash| Users.new(hash)}
+  end
+
+  def question
+    question = QuestionsDBConnection.instance.execute(<<-SQL, subject_in_question)
+    SELECT
+      *
+    FROM
+      questions
+    WHERE
+      id = ?
+    SQL
+    return nil if question.empty?
+    question.map {|hash| Questions.new(hash)}
+  end
+
+  def parent_reply # fix this
+    return nil if self.parent_reply.nil?
+    parent = QuestionsDBConnection.instance.execute(<<-SQL, parent_reply)
+    SELECT
+      *
+    FROM
+      replies
+    WHERE
+      id = ?
+    SQL
+    return nil if parent.empty?
+    parent.map {|hash| Replies.new(hash)}
+  end
+
+  def child_replies
+    child = QuestionsDBConnection.instance.execute(<<-SQL, id)
+    SELECT
+      *
+    FROM
+      replies
+    WHERE
+      parent_reply = ?
+    SQL
+    return nil if child.empty?
+    child.map {|hash| Replies.new(hash)}
+  end
+
 
 end

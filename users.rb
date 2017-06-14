@@ -45,6 +45,12 @@ class Users
     @lname = options['lname']
   end
 
+  def authored_questions
+    Questions.find_by_author_id(self.id)
+  end
 
+  def author_replies
+    Replies.find_by_user_id(self.id)
+  end
 
 end
