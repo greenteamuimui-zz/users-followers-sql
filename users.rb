@@ -45,4 +45,6 @@ class Users
     @lname = options['lname']
   end
 
+
+
 end
